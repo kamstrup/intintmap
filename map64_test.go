@@ -124,8 +124,12 @@ func TestMap64PutIfNotExists(t *testing.T) {
 	}
 
 	for i := 0; i < 100; i++ {
-		if val := m.PutIfNotExists(i, i+100); val != -i {
-			t.Fatalf("key should not have been there: %d", i)
+		val, ok := m.PutIfNotExists(i, i+100)
+		if ok {
+			t.Fatalf("key should have been there: %d", i)
+		}
+		if val != -i {
+			t.Fatalf("key should have been there: %d", i)
 		}
 	}
 }

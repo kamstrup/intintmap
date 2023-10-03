@@ -153,16 +153,17 @@ func (m *Map[K, V]) Put(key K, val V) {
 }
 
 // PutIfNotExists adds the key-value pair only if the key does not already exist
-// in the map, and returns the current value associated with the key.
-func (m *Map[K, V]) PutIfNotExists(key K, val V) V {
+// in the map, and returns the current value associated with the key and a boolean
+// indicating whether the value was newly added or not.
+func (m *Map[K, V]) PutIfNotExists(key K, val V) (V, bool) {
 	if key == K(0) {
 		if m.hasZeroKey {
-			return m.zeroVal
+			return m.zeroVal, false
 		}
 		m.zeroVal = val
 		m.hasZeroKey = true
 		m.size++
-		return val
+		return val, true
 	}
 
 	idx := m.startIndex(key)
@@ -175,9 +176,9 @@ func (m *Map[K, V]) PutIfNotExists(key K, val V) V {
 		if m.size >= m.sizeThreshold() {
 			m.rehash()
 		}
-		return val
+		return val, true
 	} else if p.K == key {
-		return p.V
+		return p.V, false
 	}
 
 	// hash collision, seek next hash match, bailing on first empty
@@ -192,9 +193,9 @@ func (m *Map[K, V]) PutIfNotExists(key K, val V) V {
 			if m.size >= m.sizeThreshold() {
 				m.rehash()
 			}
-			return val
+			return val, true
 		} else if p.K == key {
-			return p.V
+			return p.V, false
 		}
 	}
 }
