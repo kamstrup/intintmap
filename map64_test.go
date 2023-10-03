@@ -94,3 +94,38 @@ func TestMap64Delete(t *testing.T) {
 		t.Fatalf("map not empty, %d elements remain", sz)
 	}
 }
+
+func TestMap64Has(t *testing.T) {
+	m := New[int, int](10)
+	for i := 0; i < 100; i++ {
+		m.Put(i, -i)
+	}
+	if sz := m.Len(); sz != 100 {
+		t.Fatalf("expected %d elements in map: %d", 100, sz)
+	}
+
+	for i := 0; i < 100; i++ {
+		if found := m.Has(i); !found {
+			t.Fatalf("key should have been there: %d", i)
+		}
+		if found := m.Has(i + 100); found {
+			t.Fatalf("key should not be there: %d", i+100)
+		}
+	}
+}
+
+func TestMap64PutIfNotExists(t *testing.T) {
+	m := New[int, int](10)
+	for i := 0; i < 100; i++ {
+		m.Put(i, -i)
+	}
+	if sz := m.Len(); sz != 100 {
+		t.Fatalf("expected %d elements in map: %d", 100, sz)
+	}
+
+	for i := 0; i < 100; i++ {
+		if val := m.PutIfNotExists(i, i+100); val != -i {
+			t.Fatalf("key should not have been there: %d", i)
+		}
+	}
+}
