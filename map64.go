@@ -39,6 +39,35 @@ func New[K IntKey, V any](capacity int) *Map[K, V] {
 	}
 }
 
+// Has checks if the given key exists in the map.
+func (m *Map[K, V]) Has(key K) bool {
+	if key == K(0) {
+		return m.hasZeroKey
+	}
+
+	idx := m.startIndex(key)
+	p := m.data[idx]
+
+	if p.K == K(0) { // end of chain already
+		return false
+	}
+	if p.K == key { // we check zero prior to this call
+		return true
+	}
+
+	// hash collision, seek next hash match, bailing on first empty
+	for {
+		idx = m.nextIndex(idx)
+		p = m.data[idx]
+		if p.K == K(0) {
+			return false
+		}
+		if p.K == key {
+			return true
+		}
+	}
+}
+
 // Get returns the value if the key is found.
 func (m *Map[K, V]) Get(key K) (V, bool) {
 	if key == K(0) {
@@ -119,6 +148,53 @@ func (m *Map[K, V]) Put(key K, val V) {
 		} else if p.K == key {
 			p.V = val
 			return
+		}
+	}
+}
+
+// PutIfNotExists adds the key-value pair only if the key does not already exist
+// in the map, and returns the current value associated with the key.
+func (m *Map[K, V]) PutIfNotExists(key K, val V) V {
+	if key == K(0) {
+		if m.hasZeroKey {
+			return m.zeroVal
+		}
+		m.zeroVal = val
+		m.hasZeroKey = true
+		m.size++
+		return val
+	}
+
+	idx := m.startIndex(key)
+	p := &m.data[idx]
+
+	if p.K == K(0) { // end of chain already
+		p.K = key
+		p.V = val
+		m.size++
+		if m.size >= m.sizeThreshold() {
+			m.rehash()
+		}
+		return val
+	} else if p.K == key {
+		return p.V
+	}
+
+	// hash collision, seek next hash match, bailing on first empty
+	for {
+		idx = m.nextIndex(idx)
+		p = &m.data[idx]
+
+		if p.K == K(0) {
+			p.K = key
+			p.V = val
+			m.size++
+			if m.size >= m.sizeThreshold() {
+				m.rehash()
+			}
+			return val
+		} else if p.K == key {
+			return p.V
 		}
 	}
 }
