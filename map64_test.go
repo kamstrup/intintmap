@@ -69,6 +69,39 @@ func TestMap64(t *testing.T) {
 	}
 }
 
+func TestNilMap(t *testing.T) {
+	var m *Map[int, int]
+
+	if sz := m.Len(); sz != 0 {
+		t.Fatalf("nil map must have length zero: %d", sz)
+	}
+
+	if m.Has(0) || m.Has(1) {
+		t.Fatalf("nil map must not have 0 or 1 as keys")
+	}
+
+	zero, ok := m.Get(0)
+	if ok {
+		t.Fatalf("nil map must not have 0 as key")
+	}
+	if zero != 0 {
+		t.Fatalf("nil map must return zero value for missing keys")
+	}
+
+	count := 0
+	m.ForEach(func(i int, i2 int) {
+		count++
+		t.Fatalf("must not be reached, nil map has no elements")
+	})
+	if count != 0 {
+		t.Fatalf("iterating over nil map must not yield")
+	}
+
+	if m != nil { // sanity check
+		t.Fatalf("bad test - m must be nil")
+	}
+}
+
 func TestMap64Delete(t *testing.T) {
 	m := New[int, int](10)
 	for i := 0; i < 100; i++ {

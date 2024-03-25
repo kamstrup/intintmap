@@ -23,6 +23,8 @@ func phiMix64(x int) int {
 }
 
 // Map is a hashmap where the keys are some any integer type.
+// It is valid to call methods that read a nil map, similar to a standard Go map.
+// Methods valid on a nil map are Has, Get, Len, and ForEach.
 type Map[K IntKey, V any] struct {
 	data []pair[K, V] // key-value pairs
 	size int
@@ -40,7 +42,12 @@ func New[K IntKey, V any](capacity int) *Map[K, V] {
 }
 
 // Has checks if the given key exists in the map.
+// Calling this method on a nil map will return false.
 func (m *Map[K, V]) Has(key K) bool {
+	if m == nil {
+		return false
+	}
+
 	if key == K(0) {
 		return m.hasZeroKey
 	}
@@ -69,7 +76,14 @@ func (m *Map[K, V]) Has(key K) bool {
 }
 
 // Get returns the value if the key is found.
+// If you just need to check for existence it is easier to use Has.
+// Calling this method on a nil map will return the zero value for V and false.
 func (m *Map[K, V]) Get(key K) (V, bool) {
+	if m == nil {
+		var zero V
+		return zero, false
+	}
+
 	if key == K(0) {
 		if m.hasZeroKey {
 			return m.zeroVal, true
@@ -200,7 +214,13 @@ func (m *Map[K, V]) PutIfNotExists(key K, val V) (V, bool) {
 	}
 }
 
+// ForEach iterates through all key-value pairs in the map.
+// This method returns immediately if invoked on a nil map.
 func (m *Map[K, V]) ForEach(f func(K, V)) {
+	if m == nil {
+		return
+	}
+
 	if m.hasZeroKey {
 		f(K(0), m.zeroVal)
 	}
@@ -236,7 +256,12 @@ func (m *Map[K, V]) rehash() {
 }
 
 // Len returns the number of elements in the map.
+// The length of a nil map is defined to be zero.
 func (m *Map[K, V]) Len() int {
+	if m == nil {
+		return 0
+	}
+
 	return m.size
 }
 
