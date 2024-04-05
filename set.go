@@ -30,8 +30,8 @@ func (s *Set[K]) Len() int {
 
 // ForEach iterates the elements in the set.
 // This method returns immediately if the set is nil.
-func (s *Set[K]) ForEach(visit func(k K)) {
-	(*Map[K, struct{}])(s).ForEach(func(k K, _ struct{}) {
-		visit(k)
+func (s *Set[K]) ForEach(visit func(k K) bool) {
+	(*Map[K, struct{}])(s).ForEach(func(k K, _ struct{}) bool {
+		return visit(k)
 	})
 }
