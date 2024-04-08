@@ -43,8 +43,9 @@ func TestMapSimple(t *testing.T) {
 	}
 	n := len(m0)
 
-	m.ForEach(func(k int64, v int64) {
+	m.ForEach(func(k int64, v int64) bool {
 		m0[k] = -k
+		return true
 	})
 
 	if n != len(m0) {
@@ -66,11 +67,12 @@ func TestMapSimple(t *testing.T) {
 	}
 	n = len(m0)
 
-	m.ForEach(func(k int64, v int64) {
+	m.ForEach(func(k int64, v int64) bool {
 		m0[k] = -v
 		if k != v {
 			t.Errorf("didn't get expected key-value pair")
 		}
+		return true
 	})
 
 	if n != len(m0) {

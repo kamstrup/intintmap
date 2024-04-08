@@ -216,13 +216,13 @@ func (m *Map[K, V]) PutIfNotExists(key K, val V) (V, bool) {
 
 // ForEach iterates through all key-value pairs in the map.
 // This method returns immediately if invoked on a nil map.
-func (m *Map[K, V]) ForEach(f func(K, V)) {
+func (m *Map[K, V]) ForEach(f func(K, V) bool) {
 	if m == nil {
 		return
 	}
 
-	if m.hasZeroKey {
-		f(K(0), m.zeroVal)
+	if m.hasZeroKey && !f(K(0), m.zeroVal) {
+		return
 	}
 	forEach64(m.data, f)
 }
@@ -252,7 +252,10 @@ func (m *Map[K, V]) rehash() {
 		m.size = 0
 	}
 
-	forEach64(oldData, m.Put)
+	forEach64(oldData, func(k K, v V) bool {
+		m.Put(k, v)
+		return true
+	})
 }
 
 // Len returns the number of elements in the map.
@@ -277,10 +280,10 @@ func (m *Map[K, V]) nextIndex(idx int) int {
 	return (idx + 1) & (len(m.data) - 1)
 }
 
-func forEach64[K IntKey, V any](pairs []pair[K, V], f func(k K, v V)) {
+func forEach64[K IntKey, V any](pairs []pair[K, V], f func(k K, v V) bool) {
 	for _, p := range pairs {
-		if p.K != K(0) {
-			f(p.K, p.V)
+		if p.K != K(0) && !f(p.K, p.V) {
+			return
 		}
 	}
 }

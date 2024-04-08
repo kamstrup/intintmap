@@ -89,9 +89,10 @@ func TestNilMap(t *testing.T) {
 	}
 
 	count := 0
-	m.ForEach(func(i int, i2 int) {
+	m.ForEach(func(i int, i2 int) bool {
 		count++
 		t.Fatalf("must not be reached, nil map has no elements")
+		return true
 	})
 	if count != 0 {
 		t.Fatalf("iterating over nil map must not yield")
@@ -164,5 +165,22 @@ func TestMap64PutIfNotExists(t *testing.T) {
 		if val != -i {
 			t.Fatalf("key should have been there: %d", i)
 		}
+	}
+}
+
+func TestMap64ForEachStop(t *testing.T) {
+	m := New[int, int](10)
+	for i := 0; i < 100; i++ {
+		m.Put(i, -i)
+	}
+
+	count := 0
+	m.ForEach(func(k, v int) bool {
+		count++
+		return count < 50
+	})
+
+	if have, want := count, 50; have != want {
+		t.Fatalf("unexpected number of elements processed: %d, want %d", have, want)
 	}
 }

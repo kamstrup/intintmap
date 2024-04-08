@@ -34,8 +34,9 @@ func TestSet(t *testing.T) {
 	}
 
 	sum := 0
-	s.ForEach(func(k int) {
+	s.ForEach(func(k int) bool {
 		sum += k
+		return true
 	})
 	if sum != 3 {
 		t.Fatalf("total sum of elements must be 3")
@@ -54,8 +55,9 @@ func TestNilSet(t *testing.T) {
 	}
 
 	count := 0
-	s.ForEach(func(k int) {
+	s.ForEach(func(k int) bool {
 		count++
+		return true
 	})
 	if count != 0 {
 		t.Fatalf("total count of elements in nil set must be 0")
