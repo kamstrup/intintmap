@@ -16,6 +16,16 @@ func (s *Set[K]) Add(k K) bool {
 	return found
 }
 
+// Del deletes a key, returning true iff the key was found
+func (s *Set[K]) Del(k K) bool {
+	return (*Map[K, struct{}])(s).Del(k)
+}
+
+// Clear removes all items from the Set, but keeps the internal buffers for reuse.
+func (s *Set[K]) Clear() {
+	(*Map[K, struct{}])(s).Clear()
+}
+
 // Has returns true if the key is in the set.
 // If the set is nil this method always return false.
 func (s *Set[K]) Has(k K) bool {
@@ -28,8 +38,10 @@ func (s *Set[K]) Len() int {
 	return (*Map[K, struct{}])(s).Len()
 }
 
-// ForEach iterates the elements in the set.
+// ForEach iterates over the elements in the set while the visit function returns true.
 // This method returns immediately if the set is nil.
+//
+// The iteration order of a Set is not defined, so please avoid relying on it.
 func (s *Set[K]) ForEach(visit func(k K) bool) {
 	(*Map[K, struct{}])(s).ForEach(func(k K, _ struct{}) bool {
 		return visit(k)

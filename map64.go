@@ -214,8 +214,10 @@ func (m *Map[K, V]) PutIfNotExists(key K, val V) (V, bool) {
 	}
 }
 
-// ForEach iterates through all key-value pairs in the map.
+// ForEach iterates through key-value pairs in the map while the function f returns true.
 // This method returns immediately if invoked on a nil map.
+//
+// The iteration order of a Map is not defined, so please avoid relying on it.
 func (m *Map[K, V]) ForEach(f func(K, V) bool) {
 	if m == nil {
 		return

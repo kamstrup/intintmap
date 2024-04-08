@@ -43,6 +43,72 @@ func TestSet(t *testing.T) {
 	}
 }
 
+func TestSetClear(t *testing.T) {
+	s := NewSet[int](0)
+
+	s.Add(1)
+	s.Add(2)
+	if sz := s.Len(); sz != 2 {
+		t.Fatalf("unexpected set len %d", sz)
+	}
+	if !s.Has(1) || !s.Has(2) {
+		t.Fatalf("set must contain 1 and 2 before Clear()")
+	}
+
+	s.Clear()
+	if sz := s.Len(); sz != 0 {
+		t.Fatalf("unexpected set len %d", sz)
+	}
+	if s.Has(1) || s.Has(2) {
+		t.Fatalf("set must not contain 1 or 2 after Clear()")
+	}
+}
+
+func TestSetDel(t *testing.T) {
+	s := NewSet[int](0)
+
+	s.Add(1)
+	s.Add(2)
+	if sz := s.Len(); sz != 2 {
+		t.Fatalf("unexpected set len %d", sz)
+	}
+	if !s.Has(1) || !s.Has(2) {
+		t.Fatalf("set must contain 1 and 2 before Clear()")
+	}
+
+	if found := s.Del(27); found {
+		t.Fatalf("set must not contain 27")
+	}
+
+	// Delete 2
+	if found := s.Del(2); !found {
+		t.Fatalf("set must contain 2 on delete")
+	}
+	if sz := s.Len(); sz != 1 {
+		t.Fatalf("unexpected set len %d", sz)
+	}
+	if s.Has(2) {
+		t.Fatalf("set must not contain 2 after Del(2)")
+	}
+	if found := s.Del(2); found {
+		t.Fatalf("set must not contain 2 on seconb deletion")
+	}
+
+	// Delete 1
+	if found := s.Del(1); !found {
+		t.Fatalf("set must contain 1 on delete")
+	}
+	if sz := s.Len(); sz != 0 {
+		t.Fatalf("unexpected set len %d", sz)
+	}
+	if s.Has(1) {
+		t.Fatalf("set must not contain 1 after Del(1)")
+	}
+	if found := s.Del(1); found {
+		t.Fatalf("set must not contain 1 on seconb deletion")
+	}
+}
+
 func TestNilSet(t *testing.T) {
 	var s *Set[int]
 
