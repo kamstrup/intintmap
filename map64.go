@@ -2,6 +2,7 @@
 package intmap
 
 import (
+	"iter"
 	"math"
 )
 
@@ -227,6 +228,58 @@ func (m *Map[K, V]) ForEach(f func(K, V) bool) {
 		return
 	}
 	forEach64(m.data, f)
+}
+
+// All returns an iterator over key-value pairs from m.
+// The iterator returns immediately if invoked on a nil map.
+//
+// The iteration order of a Map is not defined, so please avoid relying on it.
+func (m *Map[K, V]) All() iter.Seq2[K, V] {
+	return m.ForEach
+}
+
+// Keys returns an iterator over keys in m.
+// The iterator returns immediately if invoked on a nil map.
+//
+// The iteration order of a Map is not defined, so please avoid relying on it.
+func (m *Map[K, V]) Keys() iter.Seq[K] {
+	return func(yield func(k K) bool) {
+		if m == nil {
+			return
+		}
+
+		if m.hasZeroKey && !yield(K(0)) {
+			return
+		}
+	
+		for _, p := range m.data {
+			if p.K != K(0) && !yield(p.K) {
+				return
+			}
+		}
+	}
+}
+
+// Values returns an iterator over values in m.
+// The iterator returns immediately if invoked on a nil map.
+//
+// The iteration order of a Map is not defined, so please avoid relying on it.
+func (m *Map[K, V]) Values() iter.Seq[V] {
+	return func(yield func(v V) bool) {
+		if m == nil {
+			return
+		}
+
+		if m.hasZeroKey && !yield(m.zeroVal) {
+			return
+		}
+
+		for _, p := range m.data {
+			if p.K != K(0) && !yield(p.V) {
+				return
+			}
+		}
+	}
 }
 
 // Clear removes all items from the map, but keeps the internal buffers for reuse.

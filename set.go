@@ -1,5 +1,7 @@
 package intmap
 
+import "iter"
+
 // Set is a specialization of Map modelling a set of integers.
 // Like Map, methods that read from the set are valid on the nil Set.
 // This include Has, Len, and ForEach.
@@ -46,4 +48,12 @@ func (s *Set[K]) ForEach(visit func(k K) bool) {
 	(*Map[K, struct{}])(s).ForEach(func(k K, _ struct{}) bool {
 		return visit(k)
 	})
+}
+
+// All returns an iterator over keys from the set.
+// The iterator returns immediately if the set is nil.
+//
+// The iteration order of a Set is not defined, so please avoid relying on it.
+func (s *Set[K]) All() iter.Seq[K] {
+	return s.ForEach
 }
