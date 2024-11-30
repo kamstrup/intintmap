@@ -130,3 +130,20 @@ func TestNilSet(t *testing.T) {
 	}
 
 }
+
+func TestSetIter(t *testing.T) {
+	s := NewSet[int](10)
+	for i := 0; i < 100; i++ {
+		s.Add(i)
+	}
+
+	sum := 0
+	for k := range s.All() {
+		sum += k
+	}
+
+	const sumTo99 = 99 * (99 + 1) / 2
+	if sum != sumTo99 {
+		t.Fatalf("unexpected sum: %d, want %d", sum, sumTo99)
+	}
+}

@@ -1,6 +1,8 @@
 package intmap
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestMap64(t *testing.T) {
 	type pairs [][2]int64
@@ -182,5 +184,42 @@ func TestMap64ForEachStop(t *testing.T) {
 
 	if have, want := count, 50; have != want {
 		t.Fatalf("unexpected number of elements processed: %d, want %d", have, want)
+	}
+}
+
+func TestMap64Iterators(t *testing.T) {
+	m := New[int, int](10)
+	for i := 0; i < 100; i++ {
+		m.Put(i, 99-i) // 0:99, 1:98, 2:97, ...
+	}
+	const sumTo99 = 99 * (99 + 1) / 2
+
+	sum := 0
+	for k, v := range m.All() {
+		sum += k + v
+	}
+
+	if sum != sumTo99*2 {
+		t.Fatalf("unexpected sum when iterating over keys and values: %d, want %d", sum, sumTo99*2)
+	}
+
+	sum = 0
+	for k := range m.Keys() {
+		if k == 9 {
+			continue
+		}
+		sum += k
+	}
+	expected := sumTo99 - 9
+	if sum != expected {
+		t.Fatalf("unexpected sum when iterating over keys: %d, want %d", sum, expected)
+	}
+
+	sum = 0
+	for v := range m.Values() {
+		sum += v
+	}
+	if sum != sumTo99 {
+		t.Fatalf("unexpected sum when iterating over values: %d, want %d", sum, sumTo99*2)
 	}
 }
