@@ -223,3 +223,53 @@ func TestMap64Iterators(t *testing.T) {
 		t.Fatalf("unexpected sum when iterating over values: %d, want %d", sum, sumTo99*2)
 	}
 }
+
+func TestPhiMix64(t *testing.T) {
+	cases := []struct {
+		name     string
+		input    int
+		expected func(int) int
+	}{
+		{
+			name:  "zero",
+			input: 0,
+			expected: func(x int) int {
+				return 0
+			},
+		},
+		{
+			name:  "one",
+			input: 1,
+			expected: func(x int) int {
+				h := int64(x) * 0x9E3779B9
+				return int(h ^ (h >> 16))
+			},
+		},
+		{
+			name:  "negative_one",
+			input: -1,
+			expected: func(x int) int {
+				h := int64(x) * 0x9E3779B9
+				return int(h ^ (h >> 16))
+			},
+		},
+		{
+			name:  "large_number",
+			input: 1234567,
+			expected: func(x int) int {
+				h := int64(x) * 0x9E3779B9
+				return int(h ^ (h >> 16))
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := phiMix64(tc.input)
+			expected := tc.expected(tc.input)
+			if result != expected {
+				t.Errorf("phiMix64(%d) = %d; want %d", tc.input, result, expected)
+			}
+		})
+	}
+}
